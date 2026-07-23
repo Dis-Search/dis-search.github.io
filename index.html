@@ -3,11 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Document</title>
+    <title>What's Dis?!</title>
+    <style>
+        h1 { background-color: black; color: white; padding: 10px; }
+        p { background-color: black; color: white; padding: 10px; }
+        #results { margin: 20px; padding: 10px; border: 1px solid #ccc; }
+        .query-box { margin: 20px; }
+    </style>
 </head>
 <body>
-    <h1>Important title</h1>    
-    <p>important text</p>
+    <h1>Title Search</h1>
+    <p>Your SQLite data loads here...</p>
+
+    <!-- Query input -->
+    <div class="query-box">
+        <textarea id="sqlQuery" rows="3" cols="50" placeholder="braunschweiger"></textarea><br>
+        <button onclick="runQuery()">Run Query</button>
+    </div>
+
+    <!-- Results display -->
+    <div id="results"></div>
+
+    <!-- Load sql.js and httpvfs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js-httpvfs@1.1.0/dist/sql.js-httpvfs.min.js"></script>
+
+    <script>
+        let db = null;
+
+        // Initialize database
+        async function initDB() {
+            const config = {
+                requestInterval: 0,      // No delay between chunk requests
+                prePopulateRange: true,  // Pre-fetch initial data
+                fileUrl: 'DiscuitSearch.sqlite3' 
+            };
+
+            try {
+                db = await createHttpVFS(config);
+                document.getElementById('results').innerHTML = 'Database loaded!';
+            } catch (err) {
+                document.getElementById('results').innerHTML = 'Error loading DB: ' + err.message;
+                console.error(err);
+            }
+        }
+
+        // Run SQL query
+        async function runQuery() {
+            const query = "SELECT * FROM Titles WHERE Title LIKE '%" + document.getElementById('sqlQuery').value + "%';";
+            const resultsDiv = document.getElementById('results');
+
+            if (!db) {
+                resultsDiv.innerHTML = 'Please wait for database to load...';
+                return;
+            }
+
+            try {
+                const results = db.exec(query);
+                
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p>No results</p>';
+                    return;
+                }
+
+                // Format results as HTML table
+                let html = '<table border="1" cellpadding="5"><tr>';
+                results[0].columns.forEach(col => {
+                    html += `<th>${col}</th>`;
+                });
+                html += '</tr>';
+
+                results[0].values.forEach(row => {
+                    html += '<tr>';
+                    row.forEach(val => {
+                        html += `<td>${val}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</table>';
+
+                resultsDiv.innerHTML = html;
+            } catch (err) {
+                resultsDiv.innerHTML = '❌ Query error: ' + err.message;
+            }
+        }
+
+        // Auto-load on page open
+        initDB();
+    </script>
 </body>
+</html>
 </html>
