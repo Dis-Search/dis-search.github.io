@@ -1,15 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's Dis?!</title>
+    <style>
+         * {color: white; background-color: black;}
+        #results { margin: 20px; padding: 10px; border: 1px solid #ccc; }
+        .query-box { margin: 20px; }
+    </style>
 </head>
+<body>
+    <h1>Title Search</h1>
+    <p>Your SQLite data loads here...</p>
 
-<style>
-  * {
-    color: white;
-    background-color: black;
-    
+    <!-- Query input -->
+    <div class="query-box">
+        <textarea id="sqlQuery" rows="3" cols="50" placeholder="braunschweiger"></textarea><br>
+        <button onclick="runQuery()">Run Query</button>
+    </div>
+
+    <!-- Results display -->
+    <div id="results"></div>
+
+    <!-- Load sql.js and httpvfs -->
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.14.0/dist/sql-wasm.js"></script>
+
+    <script>
+        let SQL = null;
+        let db = null;
+
+        // Initialize database
+        async function initDB() {
+    try {
+        const SQL = await initSqlJs({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.14.0/dist/${file}`
+        });
+        const response = await fetch('DiscuitSearch.sqlite3');
+        const buffer = await response.arrayBuffer();
+        db = new SQL.Database(new Uint8Array(buffer));
+        document.getElementById('results').innerHTML = 'Database loaded!';
+    } catch (err) {
+        document.getElementById('results').innerHTML = 'Error loading DB: ' + err.message;
+    }
 }
-</style>
 
-<h1>Important title</h1>
+        // Run SQL query
+        async function runQuery() {
+            const query = "SELECT PublicId, Title, CreatedAt FROM Titles_fts WHERE Title MATCH '*" + document.getElementById('sqlQuery').value + "*';";
+            const resultsDiv = document.getElementById('results');
 
-<p>important text</p>
+            if (!db) {
+                resultsDiv.innerHTML = 'Please wait for database to load...';
+                return;
+            }
+
+            try {
+                const results = db.exec(query);
+                
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p>No results</p>';
+                    return;
+                }
+
+                // Format results as HTML table
+                let html = '<table border="1" cellpadding="5"><tr>';
+                results[0].columns.forEach(col => {
+                    html += `<th>${col}</th>`;
+                });
+                html += '</tr>';
+
+                results[0].values.forEach(row => {
+                    html += '<tr>';
+                    row.forEach(val => {
+                        html += `<td>${val}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</table>';
+
+                resultsDiv.innerHTML = html;
+            } catch (err) {
+                resultsDiv.innerHTML = ' Query error: ' + err.message;
+            }
+        }
+
+        // Auto-load on page open
+        initDB();
+    </script>
+</body>
+</html>
+</html>
