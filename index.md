@@ -1,3 +1,0 @@
-# Important title
-
-Important text
