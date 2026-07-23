@@ -12,7 +12,7 @@
 </head>
 <body>
     <h1>Title Search</h1>
-    <p>Your SQLite data loads here...</p>
+    <p>Write some words and push the button</p>
 
     <!-- Query input -->
     <div class="query-box">
@@ -47,7 +47,7 @@
 
         // Run SQL query
         async function runQuery() {
-            const query = "SELECT PublicId, Title, CreatedAt FROM Titles_fts WHERE Title MATCH '*" + document.getElementById('sqlQuery').value + "*';";
+            const query = "SELECT PublicId, Title, CreatedAt FROM Titles_fts2 WHERE Title MATCH '*" + document.getElementById('sqlQuery').value + "*';";
             const resultsDiv = document.getElementById('results');
 
             if (!db) {
