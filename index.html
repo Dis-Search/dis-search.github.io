@@ -36,7 +36,7 @@
         const SQL = await initSqlJs({
             locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.14.0/dist/${file}`
         });
-        const response = await fetch('MyDatabase.sqlite3');
+        const response = await fetch('DiscuitSearch.sqlite3');
         const buffer = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buffer));
         document.getElementById('results').innerHTML = 'Database loaded!';
