@@ -24,28 +24,26 @@
     <div id="results"></div>
 
     <!-- Load sql.js and httpvfs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sql.js-httpvfs@1.1.0/dist/sql.js-httpvfs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.14.0/dist/sql-wasm.js"></script>
 
     <script>
+        let SQL = null;
         let db = null;
 
         // Initialize database
         async function initDB() {
-            const config = {
-                requestInterval: 0,      // No delay between chunk requests
-                prePopulateRange: true,  // Pre-fetch initial data
-                fileUrl: 'DiscuitSearch.sqlite3' 
-            };
-
-            try {
-                db = await createHttpVFS(config);
-                document.getElementById('results').innerHTML = 'Database loaded!';
-            } catch (err) {
-                document.getElementById('results').innerHTML = 'Error loading DB: ' + err.message;
-                console.error(err);
-            }
-        }
+    try {
+        const SQL = await initSqlJs({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.14.0/dist/${file}`
+        });
+        const response = await fetch('MyDatabase.sqlite3');
+        const buffer = await response.arrayBuffer();
+        db = new SQL.Database(new Uint8Array(buffer));
+        document.getElementById('results').innerHTML = 'Database loaded!';
+    } catch (err) {
+        document.getElementById('results').innerHTML = 'Error loading DB: ' + err.message;
+    }
+}
 
         // Run SQL query
         async function runQuery() {
@@ -83,7 +81,7 @@
 
                 resultsDiv.innerHTML = html;
             } catch (err) {
-                resultsDiv.innerHTML = '❌ Query error: ' + err.message;
+                resultsDiv.innerHTML = ' Query error: ' + err.message;
             }
         }
 
