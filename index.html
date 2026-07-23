@@ -47,7 +47,7 @@
 
         // Run SQL query
         async function runQuery() {
-            const query = "SELECT * FROM Titles WHERE Title LIKE '%" + document.getElementById('sqlQuery').value + "%';";
+            const query = "SELECT PublicId, Title, CreatedAt FROM Titles_fts WHERE Title MATCH '*" + document.getElementById('sqlQuery').value + "*';";
             const resultsDiv = document.getElementById('results');
 
             if (!db) {
